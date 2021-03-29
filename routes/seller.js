@@ -8,14 +8,14 @@ const {
     validationResult
 } = require("express-validator");
 const router = express.Router();
-const Buyer = require('../models/Buyer.js');
-const auth = require('../middleware/auth.js');
+const Seller = require('../models/Seller.js');
+const authseller = require('../middleware/authseller.js');
 
 // Load config
 dotenv.config()
 
 // @desc    SignUp | register
-// @route   POST /buyer/register
+// @route   POST /seller/register
 router.post("/register",
     [
         check("firstname", "Please Enter a Valid Firstname").not().isEmpty(),
@@ -24,7 +24,8 @@ router.post("/register",
         check("email", "Please Enter a Valid E-mail").isEmail(),
         check("password", "Please Enter a Valid Password").isLength({
             min: 8
-        })
+        }),
+        check("idproof", "Please Enter a Id-Proof").not().isEmpty()
     ],
     async (req, res) => {
         const errors = validationResult(req);
@@ -36,36 +37,36 @@ router.post("/register",
 
         try {
 
-            let buyer = await Buyer.findOne({
+            let seller = await Seller.findOne({
                 email: req.body.email
             });
-            if (buyer) {
+            if (seller) {
                 return res.status(400).json({
                     msg: "User already exists"
                 });
             }
 
-            buyer = new Buyer({
+            seller = new Seller({
                 firstname: req.body.firstname,
                 lastname: req.body.lastname,
                 address: req.body.address,
                 email: req.body.email,
                 password: req.body.password,
                 username: "",
-                sellerdetail: [],
-                liveproduct: [],
+                idproof:req.body.idproof,
+                requestforaddress: [],
+                productlist: [],
                 myorder: [],
-                whishlist: [],
             });
 
             const salt = await bcrypt.genSalt(10);
             const hashedPassword = await bcrypt.hash(req.body.password, salt);
 
-            buyer.password = hashedPassword;
+            seller.password = hashedPassword;
 
-            const savedBuyer = await buyer.save();
+            const savedSeller = await seller.save();
             res.send({
-                userid: buyer._id
+                userid: seller._id
             });
 
         } catch (err) {
@@ -77,7 +78,7 @@ router.post("/register",
     });
 
 // @desc    SignIn | Login
-// @route   POST /buyer/Login
+// @route   POST /seller/Login
 router.post("/login",
     [
         check("email", "Please enter a valid email").isEmail(),
@@ -95,16 +96,16 @@ router.post("/login",
 
         try {
 
-            const buyer = await Buyer.findOne({
+            const seller = await Seller.findOne({
                 email: req.body.email
             });
-            if (!buyer) {
+            if (!seller) {
                 return res.status(400).json({
                     msg: "User is not registered"
                 });
             }
 
-            const validPassword = await bcrypt.compare(req.body.password, buyer.password);
+            const validPassword = await bcrypt.compare(req.body.password, seller.password);
             if (!validPassword) {
                 return res.status(400).json({
                     msg: "Password is not valid"
@@ -112,7 +113,7 @@ router.post("/login",
             }
 
             const token = jwt.sign({
-                _id: buyer._id
+                _id: seller._id
             }, process.env.TOKEN_SECRET);
             res.header('auth-token', token).send({
                 'auth-token': token
@@ -126,12 +127,12 @@ router.post("/login",
         }
     });
 
-// @desc    Details | Profile, if buyer logged in already else error | buyer auth-token header
-// @route   GET /buyer/detail
-router.get("/detail", auth, async (req, res) => {
+// @desc    Details | Profile, if Seller logged in already else error | Seller auth-token header
+// @route   GET /Seller/detail
+router.get("/detail", authseller, async (req, res) => {
     try {
-        const buyer = await Buyer.find(mongoose.Types.ObjectId(req.buyer._id));
-        res.send(buyer);
+        const seller = await Seller.find(mongoose.Types.ObjectId(req.seller._id));
+        res.send(seller);
     } catch (err) {
         console.log(err);
         res.status(500).send({
