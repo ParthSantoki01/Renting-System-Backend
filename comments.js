@@ -21,3 +21,21 @@ http status code != 200
     "password": "parthsantoki"
 }
 */
+
+/* Seller Register Post Body
+{
+    "firstname": "Prit",
+    "lastname": "Patel",
+    "address": "Siddhpur",
+    "email": "prit@gmail.com",
+    "password": "pritpatel",
+    "idproof" : "adhar card"
+}
+*/
+
+/* Seller Login Post Body
+{
+    "email": "partha@gmail.com",
+    "password": "parthsantoki"
+}
+*/ 
