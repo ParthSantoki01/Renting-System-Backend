@@ -202,4 +202,59 @@ router.delete('/seller/:id', async (req, res) => {
 })
 
 
+// @desc    Buyer get a Product using id
+// @route   GET /buyer/:id
+router.get('/buyer/:id', async (req, res) => {
+    try {
+        let product = await Product.findById(req.params.id).lean()
+
+        if (!product) {
+            return res.status(404).send({
+                msg: "Product not found"
+            });
+        }
+        res.send(product)
+    } catch (err) {
+        console.error(err)
+        res.status(500).send({
+            msg: err.message
+        });
+    }
+})
+
+// @desc    Buyer get a Product by category
+// @route   GET /buyer/categories
+router.get('/buyer/categories', async (req, res) => {
+    try {
+        let product = await Product.findById(req.params.category).exec()
+        if (!product) {
+            return res.status(404).send({
+                msg: "Product not found."
+            });
+        }
+        res.send(product)
+    } catch (err) {
+        console.error(err)
+        res.status(500).send({
+            msg: err.message
+        });
+    }
+})
+
+// @desc    Seller get all Categories
+// @route   GET /seller/categories
+router.get('/seller/categories', async (req, res) => {
+    try {
+        const categories = await Categories.find({})
+        res.send(categories)
+    } catch (err) {
+        console.error(err)
+        res.status(500).send({
+            msg: err.message
+        });
+    }
+})
+
+
+
 module.exports = router;
