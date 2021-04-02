@@ -26,6 +26,7 @@ if (process.env.NODE_ENV === 'development') {
 // Routes
 app.use('/buyer', require('./routes/buyer'))
 app.use('/seller', require('./routes/seller'))
+app.use('/product', require('./routes/product'))
 
 const PORT = process.env.PORT || 3000
 
