@@ -80,7 +80,7 @@ router.get('/seller/:id', async (req, res) => {
         });
     }
 })
-  
+
 // @desc    Get products using Category
 // @route   GET/product/Seller/:category
 
@@ -95,6 +95,111 @@ router.get("/seller/:category", async (request, response) => {
         });
     }
 });
+
+// @desc    Seller post a Product
+// @route   POST /product/seller
+router.post('/seller',
+    [
+        check("title", "Please Enter a Valid Title").not().isEmpty(),
+        check("imagePath", "Please Enter a Valid Image-Path").not().isEmpty(),
+        check("description", "Please Enter a Valid Description").not().isEmpty(),
+        check("price", "Please Enter a Valid price").not().isEmpty(),
+        check("formatOfPrice", "Please Enter a Valid Format Of Price").not().isEmpty(),
+        check("startDate", "Please Enter a Valid Start Date").not().isEmpty(),
+        check("endDate", "Please Enter a Valid End Date").not().isEmpty(),
+        // check("status","Please Enter a Valid Status").not().isEmpty()
+    ],
+    async (req, res) => {
+        const errors = validationResult(req);
+        if (!errors.isEmpty()) {
+            return res.status(400).send({
+                msg: errors.errors[0].msg
+            });
+        }
+        try {
+            product = new Product({
+                title: req.body.title,
+                imagePath: req.body.imagePath,
+                description: req.body.description,
+                price: req.body.price,
+                formatOfPrice: req.body.formatOfPrice,
+                category: "",
+                seller: "",
+                available: req.body.available,
+                startDate: req.body.startDate,
+                endDate: req.body.endDate,
+                status: ""
+            });
+
+            const productSaved = await product.save();
+            // res.send({
+            //     productid: product._id
+            // });
+        } catch (err) {
+            console.error(err)
+            res.status(500).send({
+                msg: err.message
+            });
+        }
+    }
+)
+
+// @desc    Seller update a Product
+// @route   PUT /product/seller/:id
+router.put('/seller/:id', async (req, res) => {
+    try {
+        let product = await Product.findById(req.params.id).lean()
+
+        if (!product) {
+            return res.status(404).send({
+                msg: "Product not found"
+            });
+        }
+
+        product = await Product.findOneAndUpdate({
+            _id: req.params.id
+        }, req.body, {
+            new: true,
+            runValidators: true,
+        })
+        res.send({
+            msg: "Succsess"
+        })
+
+    } catch (err) {
+        console.error(err)
+        res.status(500).send({
+            msg: err.message
+        });
+    }
+})
+
+// @desc    Seller delete a Product
+// @route   DELETE /product/seller/:id
+router.delete('/seller/:id', async (req, res) => {
+    try {
+        let product = await Product.findById(req.params.id).lean()
+
+        if (!product) {
+            return res.status(404).send({
+                msg: "Product not found"
+            });
+        }
+
+        await Product.remove({
+            _id: req.params.id
+        })
+        res.send({
+            msg: "Succsess"
+        })
+
+    } catch (err) {
+        console.error(err)
+        res.status(500).send({
+            msg: err.message
+        });
+    }
+})
 
 
 module.exports = router;
