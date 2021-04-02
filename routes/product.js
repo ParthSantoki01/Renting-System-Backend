@@ -2,12 +2,46 @@ const express = require('express')
 const router = express.Router()
 
 const Product = require('../models/Product.js')
+const Categories = require('../models/Categories.js')
 
 // @desc    Home
 // @route   GET /home
 router.get('/', (req, res) => {
     res.send('Home')
 })
+
+// @desc    Buyer get all Categories
+// @route   GET /product/buyer/categories
+router.get('/buyer/categories', async (req, res) => {
+    try {
+        const categories = await Categories.find({})
+        res.send(categories)
+    } catch (err) {
+        console.error(err)
+        res.status(500).send({
+            msg: err.message
+        });
+    }
+})
+
+// @desc    Buyer get all Products
+// @route   GET/product/buyer
+router.get('/buyer', async (req, res) => {
+    try {
+        const products = await Product.find({})
+            .sort({
+                createdAt: 'desc'
+            })
+
+        res.send(products)
+    } catch (err) {
+        console.error(err)
+        res.status(500).send({
+            msg: err.message
+        });
+    }
+})
+
 
 // @desc    Seller get all Products
 // @route   GET/product/seller
