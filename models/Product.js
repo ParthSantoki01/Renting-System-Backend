@@ -18,18 +18,18 @@ const productSchema = Schema({
         trim: true
     },
     price: {
-        type: Number,
-        required: true,
-        trim: true
-    },
-    formatOfPrice: {
         type: String,
         required: true,
         trim: true
     },
-    category:{
+    formatofprice: {
+        type: String,
+        required: true,
+        trim: true
+    },
+    category: {
         type: Schema.Types.ObjectId,
-        ref: 'Categories'
+        ref: 'Category'
     },
     seller: {
         type: Schema.Types.ObjectId,
@@ -39,18 +39,19 @@ const productSchema = Schema({
         type: Boolean,
         default: true
     },
-    startDate: {
+    startdate: {
         type: Date,
-        required: true,
+        default: Date.now
     },
-    endDate:{
+    enddate: {
         type: Date,
-        required: true,
+        default: null
     },
-    status:{
+    status: {
         type: String,
-        required: true
     }
 });
 
-module.exports = mongoose.model("Product", productSchema);
+const Product = mongoose.model("Product", productSchema);
+
+module.exports = Product;
