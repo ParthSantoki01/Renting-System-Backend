@@ -10,6 +10,7 @@ const {
 const router = express.Router();
 const Buyer = require('../models/Buyer.js');
 const auth = require('../middleware/auth.js');
+const Product = require('../models/Product.js');
 
 // Load config
 dotenv.config()
@@ -55,7 +56,7 @@ router.post("/register",
                 sellerdetail: [],
                 liveproduct: [],
                 myorder: [],
-                whishlist: [],
+                wishlist: [],
             });
 
             const salt = await bcrypt.genSalt(10);
@@ -139,5 +140,61 @@ router.get("/detail", auth, async (req, res) => {
         });
     }
 });
+
+// @desc    Add Order to MyOrder on clicking on 'Buy Now' button
+// @route   PUT /buyer/updateMyOrder
+
+router.get("/updateMyOrder", async (req, res) =>{
+    try {
+        const productToBeAdded = await Product.findById(req.body.product_id)
+        const update = {
+            $addToSet: {
+                myorder: req.body.product_id
+            }
+        }
+        Buyer.findOneAndUpdate(
+            {_id: req.body.userid},
+            update,
+            {
+                new: true,
+                runValidators: true,
+            }
+        ).then(res.send("Added to MyOrders"))
+        console.log("Added to MyOrders")
+    } catch (error) {
+        console.log(error);
+        res.status(500).send({
+        msg: error.message
+    })}
+})
+
+// @desc    Add Order to Wishlist on clicking on 'Add to Wishlist' button
+// @route   PUT /buyer/updateWishlist
+
+router.get('/updateWishlist', async (req, res)=> {
+    try {
+        const productToBeAdded = await Product.findById(req.body.product_id)
+        const update = {
+            $addToSet: {
+                wishlist: req.body.product_id
+            }
+        }
+        await Buyer.findOneAndUpdate(
+            {_id: req.body.userid},
+            update,
+            {
+                new: true,
+                runValidators: true,
+            }
+        
+        ).then(res.send("Added to wishlist"))
+        
+        console.log("Product added to Wishlist")
+    } catch (error) {
+        console.log(error);
+        res.status(500).send({
+        msg: error.message
+    })}
+})
 
 module.exports = router;
