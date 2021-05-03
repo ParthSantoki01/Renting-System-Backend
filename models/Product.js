@@ -28,7 +28,7 @@ const productSchema = Schema({
         trim: true
     },
     category: {
-        type: Schema.Types.ObjectId,
+        type: String,
         ref: 'Category'
     },
     seller: {
