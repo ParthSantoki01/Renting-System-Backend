@@ -30,18 +30,11 @@ const buyerSchema = new Schema({
         required: true,
         trim: true
     },
-    sellerdetail: [{
-        sellerid: {
+    sellerdetail: [ {
             type: Schema.Types.ObjectId,
             ref: 'Seller'
-        },
-        sellername: {
-            type: String,
-        },
-        selleraddress: {
-            type: String,
         }
-    }],
+    ],
     liveproduct: [{
         type: Schema.Types.ObjectId,
         ref: 'Order'
