@@ -1,48 +1,48 @@
-const dotenv = require('dotenv')
+const dotenv = require('dotenv');
 const mongoose = require('mongoose');
 const express = require('express');
 const jwt = require('jsonwebtoken');
 const bcrypt = require('bcryptjs');
-const {
-    check,
-    validationResult
-} = require("express-validator");
+const { check, validationResult } = require('express-validator');
 const router = express.Router();
 const Buyer = require('../models/Buyer.js');
-const auth = require('../middleware/auth.js');
+const Seller = require('../models/Seller.js');
+const authbuyer = require('../middleware/authbuyer.js');
 const Product = require('../models/Product.js');
 
 // Load config
-dotenv.config()
+dotenv.config();
 
 // @desc    SignUp | register
 // @route   POST /buyer/register
-router.post("/register",
+router.post(
+    '/register',
     [
-        check("firstname", "Please Enter a Valid Firstname").not().isEmpty(),
-        check("lastname", "Please Enter a Valid Lastname").not().isEmpty(),
-        check("address", "Please Enter a Valid Address").not().isEmpty(),
-        check("email", "Please Enter a Valid E-mail").isEmail(),
-        check("password", "Please Enter a Valid Password").isLength({
-            min: 8
-        })
+        check('firstname', 'Please Enter a Valid Firstname').not().isEmpty(),
+        check('lastname', 'Please Enter a Valid Lastname').not().isEmpty(),
+        check('address', 'Please Enter a Valid Address').not().isEmpty(),
+        check('email', 'Please Enter a Valid E-mail').isEmail(),
+        check('password', 'Please Enter a Valid Password').isLength({
+            min: 8,
+        }),
     ],
     async (req, res) => {
         const errors = validationResult(req);
         if (!errors.isEmpty()) {
-            return res.status(400).send({
-                msg: errors.errors[0].msg
+            return res.send({
+                error: true,
+                msg: errors.errors[0].msg,
             });
         }
 
         try {
-
             let buyer = await Buyer.findOne({
-                email: req.body.email
+                email: req.body.email,
             });
             if (buyer) {
-                return res.status(400).json({
-                    msg: "User already exists"
+                return res.send({
+                    error: true,
+                    msg: 'User already exists',
                 });
             }
 
@@ -52,7 +52,7 @@ router.post("/register",
                 address: req.body.address,
                 email: req.body.email,
                 password: req.body.password,
-                username: "",
+                username: '',
                 sellerdetail: [],
                 liveproduct: [],
                 myorder: [],
@@ -66,135 +66,229 @@ router.post("/register",
 
             const savedBuyer = await buyer.save();
             res.send({
-                userid: buyer._id
+                error: false,
+                userid: buyer._id,
             });
-
         } catch (err) {
             console.log(err);
-            res.status(500).send({
-                msg: err.message
+            res.send({
+                error: true,
+                msg: err.message,
             });
         }
-    });
+    }
+);
 
 // @desc    SignIn | Login
 // @route   POST /buyer/Login
-router.post("/login",
+router.post(
+    '/login',
     [
-        check("email", "Please enter a valid email").isEmail(),
-        check("password", "Please enter a valid password").isLength({
-            min: 8
-        })
+        check('email', 'Please enter a valid email').isEmail(),
+        check('password', 'Please enter a valid password').isLength({
+            min: 8,
+        }),
     ],
     async (req, res) => {
         const errors = validationResult(req);
         if (!errors.isEmpty()) {
-            return res.status(400).send({
-                msg: errors.errors[0].msg
+            return res.send({
+                error: true,
+                msg: errors.errors[0].msg,
             });
         }
 
         try {
-
             const buyer = await Buyer.findOne({
-                email: req.body.email
+                email: req.body.email,
             });
             if (!buyer) {
-                return res.status(400).json({
-                    msg: "User is not registered"
+                return res.send({
+                    error: true,
+                    msg: 'User is not registered',
                 });
             }
 
-            const validPassword = await bcrypt.compare(req.body.password, buyer.password);
+            const validPassword = await bcrypt.compare(
+                req.body.password,
+                buyer.password
+            );
             if (!validPassword) {
-                return res.status(400).json({
-                    msg: "Password is not valid"
+                return res.send({
+                    error: true,
+                    msg: 'Password is not valid',
                 });
             }
 
-            const token = jwt.sign({
-                _id: buyer._id
-            }, process.env.TOKEN_SECRET);
-            res.header('auth-token', token).send({
-                'auth-token': token
+            const token = jwt.sign(
+                {
+                    _id: buyer._id,
+                },
+                process.env.TOKEN_SECRET
+            );
+            res.header('auth_token', token).send({
+                error: false,
+                auth_token: token,
             });
-
         } catch (err) {
             console.log(err);
-            res.status(500).send({
-                msg: err.message
+            res.send({
+                error: true,
+                msg: err.message,
             });
         }
-    });
+    }
+);
 
 // @desc    Details | Profile, if buyer logged in already else error | buyer auth-token header
 // @route   GET /buyer/detail
-router.get("/detail", auth, async (req, res) => {
+router.get('/detail', authbuyer, async (req, res) => {
     try {
         const buyer = await Buyer.find(mongoose.Types.ObjectId(req.buyer._id));
-        res.send(buyer);
+        res.send({
+            error: false,
+            buyer: buyer,
+        });
     } catch (err) {
         console.log(err);
-        res.status(500).send({
-            msg: err.message
+        res.send({
+            error: true,
+            msg: err.message,
+        });
+    }
+});
+
+// @desc    change password
+// @route   GET /buyer/forgot
+router.post('/forgot', authbuyer, async (req, res) => {
+    try {
+        const buyer = await Buyer.find(mongoose.Types.ObjectId(req.buyer._id));
+        if (!buyer) {
+            return res.send({
+                error: true,
+                msg: 'Enter a valid email',
+            });
+        }
+        const salt = await bcrypt.genSalt(10);
+        const hashedPassword = await bcrypt.hash(req.body.password, salt);
+        buyer.password = hashedPassword;
+        await buyer.save();
+        res.send({
+            error: false,
+            msg: 'Password Changed',
+        });
+    } catch (err) {
+        console.log(err);
+        res.send({
+            error: true,
+            msg: err.message,
         });
     }
 });
 
 // @desc    Add Order to MyOrder on clicking on 'Buy Now' button
-// @route   PUT /buyer/updateMyOrder
-
-router.get("/updateMyOrder", async (req, res) =>{
+// @route   GET /buyer/updatemyorder
+router.get('/updatemyorder', async (req, res) => {
     try {
-        const productToBeAdded = await Product.findById(req.body.product_id)
         const update = {
             $addToSet: {
-                myorder: req.body.product_id
-            }
-        }
-        Buyer.findOneAndUpdate(
-            {_id: req.body.userid},
-            update,
-            {
-                new: true,
-                runValidators: true,
-            }
-        ).then(res.send("Added to MyOrders"))
-        console.log("Added to MyOrders")
+                myorder: req.body.orderid,
+            },
+        };
+        Buyer.findOneAndUpdate({ _id: req.body.buyer }, update, {
+            new: true,
+            runValidators: true,
+        }).then(
+            res.send({
+                error: false,
+                msg: 'Added to MyOrders',
+            })
+        );
     } catch (error) {
         console.log(error);
-        res.status(500).send({
-        msg: error.message
-    })}
-})
+        res.send({
+            error: true,
+            msg: error.message,
+        });
+    }
+});
 
 // @desc    Add Order to Wishlist on clicking on 'Add to Wishlist' button
-// @route   PUT /buyer/updateWishlist
-
-router.get('/updateWishlist', async (req, res)=> {
+// @route   GET /buyer/updateWishlist
+router.get('/updateWishlist', async (req, res) => {
     try {
-        const productToBeAdded = await Product.findById(req.body.product_id)
         const update = {
             $addToSet: {
-                wishlist: req.body.product_id
-            }
-        }
-        await Buyer.findOneAndUpdate(
-            {_id: req.body.userid},
-            update,
-            {
-                new: true,
-                runValidators: true,
-            }
-        
-        ).then(res.send("Added to wishlist"))
-        
-        console.log("Product added to Wishlist")
+                wishlist: req.body.product_id,
+            },
+        };
+        await Buyer.findOneAndUpdate({ _id: req.body.buyer }, update, {
+            new: true,
+            runValidators: true,
+        }).then(
+            res.send({
+                error: false,
+                msg: 'Added to wishlist',
+            })
+        );
     } catch (error) {
         console.log(error);
-        res.status(500).send({
-        msg: error.message
-    })}
-})
+        res.send({
+            error: true,
+            msg: error.message,
+        });
+    }
+});
+
+// @desc    Request address
+// @route   post /buyer/request
+router.post('/request', async (req, res) => {
+    try {
+        const filter = { _id: req.body.seller };
+        const update = {
+            $addToSet: {
+                requestforaddress: req.body.buyer,
+            },
+        };
+
+        let seller = await Seller.findOneAndUpdate(filter, update, {
+            new: false,
+        }).then(
+            res.send({
+                error: false,
+                msg: 'Request Send to Seller',
+            })
+        );
+    } catch (err) {
+        console.log(error);
+        res.send({
+            error: true,
+            msg: error.message,
+        });
+    }
+});
+
+// @desc    Show all address
+// @route   post /buyer/address
+router.get('/address', async (req, res) => {
+    try {
+        let buyer = await Buyer.findById(req.body.buyer);
+        await Seller.find(
+            { _id: buyer.sellerdetail },
+            { firstname: 1, lastname: 1, address: 1, _id: 0 }
+        ).then((data) => {
+            res.send({
+                error: false,
+                data: data,
+            });
+        });
+    } catch (err) {
+        console.log(error);
+        res.send({
+            error: true,
+            msg: error.message,
+        });
+    }
+});
 
 module.exports = router;
