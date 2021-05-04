@@ -290,5 +290,24 @@ router.get('/address', async (req, res) => {
         });
     }
 });
+// @desc    Add item to Wishlist on clicking on 'Add to Wishlist' button
+// @route   GET /buyer/getwishlist
+
+router.get('/getwishlist', async (req,res)=> {
+    try {
+        const buyer = await Buyer.findById(req.body.userid)
+        if (buyer.wishlist === null)
+        {
+            return res.send("No items in the Wishlist")
+        }
+        console.log("Showing Wishlist")
+        res.send(buyer.wishlist)
+    } catch (error) {
+        console.error(error)
+		response.status(500).send({
+		msg: error.message
+    });
+    }
+});
 
 module.exports = router;
