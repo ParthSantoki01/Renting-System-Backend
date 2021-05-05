@@ -295,19 +295,56 @@ router.get('/address', async (req, res) => {
 
 router.get('/getwishlist', async (req,res)=> {
     try {
-        const buyer = await Buyer.findById(req.body.userid)
+        const buyer = await Buyer.findById(req.body.buyer)
         if (buyer.wishlist === null)
         {
             return res.send("No items in the Wishlist")
         }
-        console.log("Showing Wishlist")
-        res.send(buyer.wishlist)
+        res.send({
+            error : false,
+            buyer : buyer.wishlist})
     } catch (error) {
-        console.error(error)
-		response.status(500).send({
-		msg: error.message
+        console.log(error);
+        res.send({
+            error: true,
+            msg: error.message,
     });
     }
 });
+
+// @desc  Remove an item from wishlist when clicked on remove from Wishlist
+// @route GET /buyer/removeWishlist
+router.put('/removeitem', async (req,res)=> {
+    try {
+        
+        const buyer = await Buyer.findOneAndUpdate({
+            _id : req.body.buyer
+        },
+        {
+            $pull :{
+                wishlist : req.body.product
+            }
+        }
+        )
+        if (buyer.wishlist === null)
+        {
+            return res.send("No items in to remove from Wishlist")
+        }
+        else
+        {
+            res.send({
+                error: false,
+                msg: "Product Removed"});
+        }
+    } catch (error) {
+        console.log(error);
+        res.send({
+            error: true,
+            msg: error.message,
+    });
+    }
+})
+
+
 
 module.exports = router;
