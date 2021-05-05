@@ -188,14 +188,14 @@ router.post('/forgot', authbuyer, async (req, res) => {
 
 // @desc    Add Order to MyOrder on clicking on 'Buy Now' button
 // @route   GET /buyer/updatemyorder
-router.get('/updatemyorder', async (req, res) => {
+router.post('/updatemyorder', async (req, res) => {
     try {
         const update = {
             $addToSet: {
-                myorder: req.params.orderid,
+                myorder: req.body.orderid,
             },
         };
-        Buyer.findOneAndUpdate({ _id: req.params.buyer }, update, {
+        Buyer.findOneAndUpdate({ _id: req.body.buyer }, update, {
             new: true,
             runValidators: true,
         }).then(
@@ -215,14 +215,14 @@ router.get('/updatemyorder', async (req, res) => {
 
 // @desc    Add Order to Wishlist on clicking on 'Add to Wishlist' button
 // @route   GET /buyer/updateWishlist
-router.get('/updateWishlist', async (req, res) => {
+router.post('/updateWishlist', async (req, res) => {
     try {
         const update = {
             $addToSet: {
-                wishlist: req.params.product_id,
+                wishlist: req.body.product_id,
             },
         };
-        await Buyer.findOneAndUpdate({ _id: req.params.buyer }, update, {
+        await Buyer.findOneAndUpdate({ _id: req.body.buyer }, update, {
             new: true,
             runValidators: true,
         }).then(
@@ -270,9 +270,9 @@ router.post('/request', async (req, res) => {
 
 // @desc    Show all address
 // @route   post /buyer/address
-router.get('/address', async (req, res) => {
+router.post('/address', async (req, res) => {
     try {
-        let buyer = await Buyer.findById(req.params.buyer);
+        let buyer = await Buyer.findById(req.body.buyer);
         await Seller.find(
             { _id: buyer.sellerdetail },
             { firstname: 1, lastname: 1, address: 1, _id: 0 }
@@ -293,9 +293,9 @@ router.get('/address', async (req, res) => {
 // @desc    Add item to Wishlist on clicking on 'Add to Wishlist' button
 // @route   GET /buyer/getwishlist
 
-router.get('/getwishlist', async (req,res)=> {
+router.post('/getwishlist', async (req,res)=> {
     try {
-        const buyer = await Buyer.findById(req.params.buyer)
+        const buyer = await Buyer.findById(req.body.buyer)
         if (buyer.wishlist.length === 0)
         {
             return res.send("No items in the Wishlist")
@@ -329,7 +329,7 @@ router.put('/removeitem', async (req,res)=> {
             }
         }
         )
-        if (buyer.wishlist === null)
+        if (buyer.wishlist.length === 0)
         {
             return res.send("No items in to remove from Wishlist")
         }
