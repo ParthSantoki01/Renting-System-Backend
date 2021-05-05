@@ -193,9 +193,9 @@ router.post('/forgot', authseller, async (req, res) => {
 
 // @desc    my all products
 // @route   GET /myproducts
-router.get('/myproducts', async (req, res) => {
+router.post('/myproducts', async (req, res) => {
     try {
-        let data = Product.find({ seller: req.params.seller_id }).then((data) => {
+        let data = Product.find({ seller: req.body.seller_id }).then((data) => {
             res.send({
                 error: false,
                 data: data,
@@ -212,9 +212,9 @@ router.get('/myproducts', async (req, res) => {
 
 // @desc    show all pending requests
 // @route   GET /myrequest
-router.get('/myrequest', async (req, res) => {
+router.post('/myrequest', async (req, res) => {
     try {
-        let seller = await Seller.findById(req.params.seller);
+        let seller = await Seller.findById(req.body.seller);
         await Buyer.find(
             { _id: seller.requestforaddress },
             { firstname: 1, lastname: 1, email: 1 }
@@ -270,5 +270,26 @@ router.post('/accept', async (req, res) => {
         });
     }
 });
+
+//@desc Get the name of the seller
+//@route GET /seller/getname
+
+router.get('/getname/:id',async(req,res)=>{
+    try{
+         await Seller.find({_id: req.params.id},{firstname:1,lastname:1,_id:0}).then(data=>{
+            res.send({
+                error : false,
+                data : data,
+            }
+            )
+        })
+    }catch(err){
+        console.log(err);
+        res.send({
+            error: true,
+            msg: err.message,
+        });
+    }
+})
 
 module.exports = router;
