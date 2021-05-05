@@ -195,7 +195,7 @@ router.post('/forgot', authseller, async (req, res) => {
 // @route   GET /myproducts
 router.get('/myproducts', async (req, res) => {
     try {
-        let data = Product.find({ seller: req.body.seller_id }).then((data) => {
+        let data = Product.find({ seller: req.params.seller_id }).then((data) => {
             res.send({
                 error: false,
                 data: data,
@@ -214,7 +214,7 @@ router.get('/myproducts', async (req, res) => {
 // @route   GET /myrequest
 router.get('/myrequest', async (req, res) => {
     try {
-        let seller = await Seller.findById(req.body.seller);
+        let seller = await Seller.findById(req.params.seller);
         await Buyer.find(
             { _id: seller.requestforaddress },
             { firstname: 1, lastname: 1, email: 1 }

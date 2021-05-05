@@ -192,10 +192,10 @@ router.get('/updatemyorder', async (req, res) => {
     try {
         const update = {
             $addToSet: {
-                myorder: req.body.orderid,
+                myorder: req.params.orderid,
             },
         };
-        Buyer.findOneAndUpdate({ _id: req.body.buyer }, update, {
+        Buyer.findOneAndUpdate({ _id: req.params.buyer }, update, {
             new: true,
             runValidators: true,
         }).then(
@@ -219,10 +219,10 @@ router.get('/updateWishlist', async (req, res) => {
     try {
         const update = {
             $addToSet: {
-                wishlist: req.body.product_id,
+                wishlist: req.params.product_id,
             },
         };
-        await Buyer.findOneAndUpdate({ _id: req.body.buyer }, update, {
+        await Buyer.findOneAndUpdate({ _id: req.params.buyer }, update, {
             new: true,
             runValidators: true,
         }).then(
@@ -272,7 +272,7 @@ router.post('/request', async (req, res) => {
 // @route   post /buyer/address
 router.get('/address', async (req, res) => {
     try {
-        let buyer = await Buyer.findById(req.body.buyer);
+        let buyer = await Buyer.findById(req.params.buyer);
         await Seller.find(
             { _id: buyer.sellerdetail },
             { firstname: 1, lastname: 1, address: 1, _id: 0 }
@@ -295,14 +295,17 @@ router.get('/address', async (req, res) => {
 
 router.get('/getwishlist', async (req,res)=> {
     try {
-        const buyer = await Buyer.findById(req.body.buyer)
-        if (buyer.wishlist === null)
+        const buyer = await Buyer.findById(req.params.buyer)
+        if (buyer.wishlist.length === 0)
         {
             return res.send("No items in the Wishlist")
         }
-        res.send({
-            error : false,
-            buyer : buyer.wishlist})
+        await Product.find({_id : buyer.wishlist}).then(data=>{
+            res.send({
+                error : false,
+                data : data})
+        })
+        
     } catch (error) {
         console.log(error);
         res.send({
