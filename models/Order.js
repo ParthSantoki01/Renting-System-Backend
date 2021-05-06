@@ -19,7 +19,7 @@ const orderSchema = new Schema({
         require: true,
     },
     totalprice: {
-        type: Number,
+        type: String,
         require: true,
     },
     paymentid: {
