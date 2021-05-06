@@ -292,4 +292,43 @@ router.get('/getname/:id',async(req,res)=>{
     }
 })
 
+//@desc If seller declines the request of the buyer
+//@route  POST /seller/decline
+
+router.post('/decline',async(req,res)=>{
+    try{
+        let seller = await Seller.findOneAndUpdate(
+            {
+                _id: req.body.seller,
+            },
+            {
+                $pull: {
+                    requestforaddress: req.body.buyer,
+                },
+            }
+        );
+        const filter = { _id: req.body.buyer };
+        const update = {
+            $push: {
+                message: "The seller "+seller.firstname+" "+seller.lastname+" declined your request",
+            },
+        };
+        let accept = await Buyer.findOneAndUpdate(filter, update, {
+            new: true,
+        }).then(
+            res.send({
+                error: false,
+                msg: 'Buyer declined access sucessfully',
+            })
+        );
+
+    }catch(err){
+        console.log(err);
+        res.send({
+            error: true,
+            msg: err.message,
+        });
+    }
+})
+
 module.exports = router;
