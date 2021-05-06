@@ -275,7 +275,7 @@ router.post('/address', async (req, res) => {
         let buyer = await Buyer.findById(req.body.buyer);
         await Seller.find(
             { _id: buyer.sellerdetail },
-            { firstname: 1, lastname: 1, address: 1, _id: 0 }
+            { firstname: 1, lastname: 1, address: 1,email:1, _id: 0 }
         ).then((data) => {
             res.send({
                 error: false,
@@ -298,7 +298,9 @@ router.post('/getwishlist', async (req,res)=> {
         const buyer = await Buyer.findById(req.body.buyer)
         if (buyer.wishlist.length === 0)
         {
-            return res.send("No items in the Wishlist")
+            return res.send({
+                error: true,
+                msg :"No items in the Wishlist"})
         }
         await Product.find({_id : buyer.wishlist}).then(data=>{
             res.send({
@@ -331,7 +333,9 @@ router.put('/removeitem', async (req,res)=> {
         )
         if (buyer.wishlist.length === 0)
         {
-            return res.send("No items in to remove from Wishlist")
+            return res.send({
+                error: true,
+                msg :"No items in to remove from Wishlist"})
         }
         else
         {
@@ -347,6 +351,25 @@ router.put('/removeitem', async (req,res)=> {
     });
     }
 })
+
+//@desc Get all declined messages for a given buyerid
+//@routes  /buyer/getmessage
+router.get('/getmessage/:id',async(req,res)=>{
+    try{
+        await Buyer.find({_id:req.params.id},{message:1,_id:0}).then(data=>{
+            res.send({
+                error:false,
+                data: data,
+            })
+        })
+    }catch(err){
+        console.log(err);
+        res.send({
+            error: true,
+            msg: err.message,
+        });
+    }
+}) 
 
 
 

@@ -54,6 +54,12 @@ const buyerSchema = new Schema({
             ref: 'Product',
         },
     ],
+    message :[
+        {
+            type: String,
+            trim : true,
+        }
+    ],
 });
 
 const Buyer = mongoose.model('Buyer', buyerSchema);
