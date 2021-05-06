@@ -10,7 +10,10 @@ router.post(
     [
         check('address', 'Please Enter a Valid Address').not().isEmpty(),
         check('totalprice', 'Please Enter a Valid Price').not().isEmpty(),
-        check('paymentid', 'Please Enter a Valid Payment ID').not().isEmpty(),
+        check('buyerid','Please enter a valid buyer id').not().isEmpty(),
+        check('sellerid','Please enter a valid seller id').not().isEmpty(),
+        check('productid','Please enter a valid product id').not().isEmpty(),
+        check('returndate','Please enter a valid return date').not().isEmpty(),
     ],
     async (req, res) => {
         const errors = validationResult(req);
@@ -27,7 +30,7 @@ router.post(
                 productid: req.body.productid,
                 address: req.body.address,
                 totalprice: req.body.price,
-                paymentid: req.body.paymentid,
+                paymentid: 'paytm123',
                 returndate: req.body.returndate,
             });
             const ordersaved = await order.save();
