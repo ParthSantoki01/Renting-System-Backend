@@ -160,10 +160,10 @@ router.get('/detail', authbuyer, async (req, res) => {
 
 // @desc    change password
 // @route   GET /buyer/forgot
-router.post('/forgot', authbuyer, async (req, res) => {
+router.post('/forgot', async (req, res) => {
     try {
-        const buyer = await Buyer.find(mongoose.Types.ObjectId(req.buyer._id));
-        if (!buyer) {
+        const buyer = await Buyer.findOne({_id : req.body.buyer});
+        if (!Buyer) {
             return res.send({
                 error: true,
                 msg: 'Enter a valid email',
@@ -172,7 +172,7 @@ router.post('/forgot', authbuyer, async (req, res) => {
         const salt = await bcrypt.genSalt(10);
         const hashedPassword = await bcrypt.hash(req.body.password, salt);
         buyer.password = hashedPassword;
-        await buyer.save();
+        await buyer.save()
         res.send({
             error: false,
             msg: 'Password Changed',
