@@ -163,12 +163,10 @@ router.get('/detail', authseller, async (req, res) => {
 
 // @desc    change password
 // @route   GET /seller/forgot
-router.post('/forgot', authseller, async (req, res) => {
+router.post('/forgot', async (req, res) => {
     try {
-        const seller = await Seller.find(
-            mongoose.Types.ObjectId(req.seller._id)
-        );
-        if (!seller) {
+        const seller = await Seller.findOne({_id: req.body.seller});
+        if (!Seller) {
             return res.send({
                 error: true,
                 msg: 'Enter a valid email',
