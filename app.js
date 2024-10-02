@@ -1,35 +1,51 @@
-const express = require('express')
-const dotenv = require('dotenv')
-const morgan = require('morgan')
-const connectDB = require('./config/db')
+const express = require('express');
+const dotenv = require('dotenv');
+const morgan = require('morgan');
+const cors = require('cors');
+const connectDB = require('./config/db');
 
 // Load config
-dotenv.config({
-    path: './config/config.env'
-})
+dotenv.config();
 
-connectDB()
+connectDB();
 
-const app = express()
+const app = express();
+
+app.use(cors());
 
 // Body parser
-app.use(express.urlencoded({
-    extended: false
-}))
-app.use(express.json())
+app.use(
+    express.urlencoded({
+        extended: false,
+    })
+);
+app.use(express.json());
 
 // Logging
 if (process.env.NODE_ENV === 'development') {
-    app.use(morgan('dev'))
+    app.use(morgan('dev'));
 }
 
-// Routes
-app.use('/buyer', require('./routes/buyer'))
-app.use('/seller', require('./routes/seller'))
+//home page route
+app.get('/', (req, res) => {
+    const response = {
+        error: false,
+        msg: 'Welcome to Renting System!',
+    };
+    res.send(response);
+});
 
-const PORT = process.env.PORT || 3000
+// Routes
+app.use('/buyer', require('./routes/buyer'));
+app.use('/seller', require('./routes/seller'));
+app.use('/product', require('./routes/product'));
+app.use('/order', require('./routes/order'));
+
+const PORT = process.env.PORT || 3000;
 
 app.listen(
     PORT,
-    console.log(`Server running in ${process.env.NODE_ENV} mode on port ${PORT}`)
-)
+    console.log(
+        `Server running in ${process.env.NODE_ENV} mode on port ${PORT}`
+    )
+);

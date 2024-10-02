@@ -8,47 +8,53 @@ const sellerschema = new Schema({
     email: {
         type: String,
         required: true,
-        trim: true
+        trim: true,
     },
     password: {
         type: String,
         required: true,
-        trim: true
+        trim: true,
     },
     firstname: {
         type: String,
         required: true,
-        trim: true
+        trim: true,
     },
     lastname: {
         type: String,
         required: true,
-        trim: true
+        trim: true,
     },
     address: {
         type: String,
         required: true,
-        trim: true
+        trim: true,
     },
-    idproof:{
-      type:String,
-      required : true,
-      unique : true
+    idproof: {
+        type: String,
+        required: true,
+        unique: true,
     },
-    requestforaddress : [{
-        type: Schema.Types.ObjectId,
-        ref: 'Buyer'
-    }],
-    productlist: [{
-        type: Schema.Types.ObjectId,
-        ref: 'Product'
-    }],
-    myorder: [{
-      type: Schema.Types.ObjectId,
-      ref: 'Order'
-  }]
+    requestforaddress: [
+        {
+            type: Schema.Types.ObjectId,
+            ref: 'Buyer',
+        },
+    ],
+    productlist: [
+        {
+            type: Schema.Types.ObjectId,
+            ref: 'Product',
+        },
+    ],
+    myorder: [
+        {
+            type: Schema.Types.ObjectId,
+            ref: 'Order',
+        },
+    ],
 });
 
-const Seller = mongoose.model("Seller", sellerschema);
+const Seller = mongoose.model('Seller', sellerschema);
 
 module.exports = Seller;

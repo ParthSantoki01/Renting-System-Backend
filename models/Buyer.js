@@ -8,54 +8,60 @@ const buyerSchema = new Schema({
     email: {
         type: String,
         required: true,
-        trim: true
+        trim: true,
     },
     password: {
         type: String,
         required: true,
-        trim: true
+        trim: true,
     },
     firstname: {
         type: String,
         required: true,
-        trim: true
+        trim: true,
     },
     lastname: {
         type: String,
         required: true,
-        trim: true
+        trim: true,
     },
     address: {
         type: String,
         required: true,
-        trim: true
+        trim: true,
     },
-    sellerdetail: [{
-        sellerid: {
+    sellerdetail: [
+        {
             type: Schema.Types.ObjectId,
-            ref: 'Seller'
+            ref: 'Seller',
         },
-        sellername: {
-            type: String,
+    ],
+    liveproduct: [
+        {
+            type: Schema.Types.ObjectId,
+            ref: 'Order',
         },
-        selleraddress: {
+    ],
+    myorder: [
+        {
+            type: Schema.Types.ObjectId,
+            ref: 'Order',
+        },
+    ],
+    wishlist: [
+        {
+            type: Schema.Types.ObjectId,
+            ref: 'Product',
+        },
+    ],
+    message :[
+        {
             type: String,
+            trim : true,
         }
-    }],
-    liveproduct: [{
-        type: Schema.Types.ObjectId,
-        ref: 'Order'
-    }],
-    myorder: [{
-        type: Schema.Types.ObjectId,
-        ref: 'Order'
-    }],
-    whishlist: [{
-        type: Schema.Types.ObjectId,
-        ref: 'Product'
-    }],
+    ],
 });
 
-const Buyer = mongoose.model("Buyer", buyerSchema);
+const Buyer = mongoose.model('Buyer', buyerSchema);
 
 module.exports = Buyer;
